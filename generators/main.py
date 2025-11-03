@@ -102,6 +102,7 @@ def main():
     export_workflow(workflow)
     print("\nWorkflow generation complete!")
     print(f"Markdown and JSON files saved for workflow ID: {workflow.workflow_id}")
+aiwf --purpose "educational" --audience "beginner"
 
 if __name__ == "__main__":
     main()
