@@ -1,0 +1,9 @@
+numpy>=1.26.0
+networkx>=3.2.0
+graphviz>=0.20.3
+python-Levenshtein>=0.23.0
+aiofiles>=24.1.0
+pytest>=8.1.0
+colorama>=0.4.6
+rich>=13.6.0
+tqdm>=4.66.0
