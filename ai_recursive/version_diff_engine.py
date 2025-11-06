@@ -6,8 +6,19 @@ Grimoire v4.7 — Diff-Based Regeneration System
 Compares two versions of a workflow (JSON or re-imported Markdown) and
 detects semantic and structural differences. When differences exceed
 a configurable threshold, a regeneration cycle can be triggered automatically.
-"""
 
+"""
+"""Usage: python:
+> from ai_recursive.version_diff_engine import compare_workflows
+> compare_workflows(
+    "./data/workflows/workflow_original.json",
+    "./data/workflows/workflow_modified.json",
+    auto_regen=True
+)
+
+"""
+"""
+"""
 import json
 import os
 from difflib import unified_diff
