@@ -1,0 +1,39 @@
+{
+  "template_id": "training_curriculum",
+  "title": "AI Training Curriculum Blueprint",
+  "description": "Defines a structure for creating educational or training workflows.",
+  "phases": [
+    {
+      "id": "P1",
+      "title": "Learning Objectives Definition",
+      "tasks": [
+        "Identify learning goals",
+        "Clarify audience skill level",
+        "Define measurable outcomes"
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Content Sequencing",
+      "tasks": [
+        "Group related topics into modules",
+        "Define dependency relationships",
+        "Draft session outlines"
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Assessment and Feedback Design",
+      "tasks": [
+        "Specify assessment criteria",
+        "Define feedback loops",
+        "Integrate adaptive revision paths"
+      ]
+    }
+  ],
+  "metadata": {
+    "category": "Education",
+    "author": "Grimoire v4.5",
+    "version": "1.0"
+  }
+}
