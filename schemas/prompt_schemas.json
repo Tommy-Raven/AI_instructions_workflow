@@ -1,1 +1,41 @@
 
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/prompt_schema.json",
+  "title": "Instructional Workflow Prompt Schema",
+  "description": "Validates user input before generating a workflow.",
+  "type": "object",
+  "properties": {
+    "purpose": {
+      "type": "string",
+      "minLength": 3,
+      "description": "The instructional goal, e.g., 'Teach Python loops'."
+    },
+    "target_audience": {
+      "type": "string",
+      "enum": ["beginner", "intermediate", "expert"],
+      "description": "The intended learner level."
+    },
+    "delivery_mode": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["text", "code", "visual", "interactive"] },
+      "description": "Preferred modes of delivery."
+    },
+    "expansion_mode": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["recursive", "modular", "adaptive"] },
+      "description": "How the workflow expands or refines itself."
+    },
+    "evaluation_method": {
+      "type": "string",
+      "enum": ["self-refinement", "peer-review", "simulation"],
+      "description": "Type of evaluation to be applied."
+    },
+    "style": {
+      "type": "string",
+      "enum": ["technical", "friendly", "wizardly", "academic"],
+      "description": "Preferred tone or voice of instruction."
+    }
+  },
+  "required": ["purpose", "target_audience", "style"]
+}
