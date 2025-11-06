@@ -1,1 +1,56 @@
 
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/ontology_schema.json",
+  "title": "Instructional Workflow Ontology",
+  "description": "Defines semantic relationships among workflow components.",
+  "type": "object",
+  "properties": {
+    "workflow_id": {
+      "type": "string",
+      "description": "Unique identifier for each generated workflow."
+    },
+    "purpose": {
+      "type": "string",
+      "description": "High-level goal or intent of the instructional workflow."
+    },
+    "target_audience": {
+      "type": "string",
+      "description": "Intended learner group or experience level."
+    },
+    "phases": {
+      "type": "array",
+      "description": "Ordered process phases that define the workflow logic.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "input": { "type": "array", "items": { "type": "string" } },
+          "output": { "type": "array", "items": { "type": "string" } },
+          "submodules": { "type": "array" },
+          "ai_task_logic": { "type": "string" },
+          "human_actionable": { "type": "string" }
+        },
+        "required": ["id", "title", "input", "output"]
+      }
+    },
+    "dependency_graph": {
+      "type": "object",
+      "properties": {
+        "nodes": { "type": "array", "items": { "type": "string" } },
+        "edges": {
+          "type": "array",
+          "items": { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 2 }
+        }
+      },
+      "required": ["nodes", "edges"]
+    },
+    "evaluation_metrics": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of quality metrics used during workflow evaluation."
+    }
+  },
+  "required": ["workflow_id", "purpose", "target_audience", "phases", "dependency_graph"]
+}
