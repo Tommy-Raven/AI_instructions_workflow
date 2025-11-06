@@ -1,1 +1,40 @@
 
+{
+  "template_id": "creative_writing",
+  "title": "Creative Writing Instructional Workflow",
+  "description": "Guides the generation of structured yet imaginative literary work using AI-assisted creative processes.",
+  "phases": [
+    {
+      "id": "P1",
+      "title": "Concept Invocation",
+      "tasks": [
+        "Identify the story’s core emotion or theme",
+        "Invoke symbolic archetypes or mythic parallels",
+        "Define tone, setting, and voice consistency"
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Composition and Expansion",
+      "tasks": [
+        "Generate an outline with narrative beats or poetic structure",
+        "Expand through sensory and emotional detail",
+        "Iterate with character or motif-based recursion"
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Refinement and Reflection",
+      "tasks": [
+        "Perform linguistic rhythm analysis and tonal balance",
+        "Integrate metaphorical and literal coherence",
+        "Evaluate narrative integrity and thematic fulfillment"
+      ]
+    }
+  ],
+  "metadata": {
+    "category": "Literary Arts",
+    "author": "Grimoire v4.5",
+    "version": "1.0"
+  }
+}
