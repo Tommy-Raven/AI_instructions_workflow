@@ -4,6 +4,17 @@
 
 flowchart TB
 
+|     Color     | Category                              | Example Folder                                                  |
+| :-----------: | :------------------------------------ | :-------------------------------------------------------------- |
+|  🔵 **Blue**  | Root / Project Base                   | `/ai-instructional-workflow-generator/`                         |
+|  🟩 **Green** | Active Package (importable namespace) | `/ai_core/`, `/ai_recursive/`, `/ai_memory/`, `/ai_evaluation/` |
+| 🟧 **Orange** | Module (.py file)                     | `/ai_core/phases/evaluation.py`                                 |
+| 🟪 **Purple** | Test or Validation Layer              | `/tests/test_ai_core.py`                                        |
+| 🟨 **Yellow** | Config / Schema / Metadata            | `/schemas/*.json`, `/requirements.txt`                          |
+|   🟥 **Red**  | Documentation & Diagrams              | `/docs/ARCHITECTURE.md`, `/docs/AI_RECURSION.md`                |
+|  🟦 **Cyan**  | Interface / Legacy CLI Layer          | `/generator/main.py`, `/generator/workflow.py`                  |
+
+
     %% ROOT
     ROOT[🔵 ai-instructional-workflow-generator]:::root
 
@@ -85,3 +96,4 @@ flowchart TB
     classDef test fill:#A020F0,stroke:#5D007A,color:white;
     classDef docs fill:#FF6B6B,stroke:#B22222,color:white;
     classDef cli fill:#00CED1,stroke:#007C80,color:black;
+
