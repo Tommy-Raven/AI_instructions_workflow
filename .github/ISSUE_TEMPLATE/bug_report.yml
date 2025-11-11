@@ -1,0 +1,87 @@
+name: Bug Report
+description: Report a problem or unexpected behavior in Grimoire – WorkflowAI
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: ["Tommy-Raven"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thank you for reporting a bug!
+        Please fill out the details below to help us reproduce and fix the issue quickly.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Brief summary
+      description: Provide a short summary of the issue.
+      placeholder: "Example: Workflow engine crashes during recursive merge"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List each step needed to trigger the issue.
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened instead?
+      placeholder: "The merge_engine should produce a new workflow variant without errors."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened?
+      placeholder: "Traceback error in recursion_manager.py line 114"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Choose the environment where this bug occurs.
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other / Containerized
+    validations:
+      required: true
+
+  - type: input
+    id: python_version
+    attributes:
+      label: Python version
+      placeholder: "e.g. 3.11.2"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste any logs, stack traces, or images that help diagnose the issue.
+      render: bash
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Checklist
+      options:
+        - label: I’ve verified this issue isn’t already reported
+          required: true
+        - label: I’ve included reproduction steps and version info
+          required: true
