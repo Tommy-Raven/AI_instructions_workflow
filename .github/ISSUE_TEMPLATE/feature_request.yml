@@ -1,0 +1,68 @@
+name: Feature Request
+description: Suggest a new feature or improvement for Grimoire – WorkflowAI
+title: "[Feature]: "
+labels: ["enhancement", "discussion"]
+assignees: ["Tommy-Raven"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ##  New Idea or Improvement
+        Use this form to describe your feature idea clearly.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: Provide a concise title or one-sentence description.
+      placeholder: "Example: Add dependency visualization dashboard"
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this feature valuable or necessary?
+      placeholder: "This would help track evolving workflows visually..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe how you think this feature could be implemented.
+      placeholder: "We could extend graphviz_adapter.py to support interactive nodes."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: List any alternative approaches or existing workarounds.
+      placeholder: "Manually rendering dependency graphs via external tools."
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Suggested priority
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+      description: How important is this feature to your work?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: final_check
+    attributes:
+      label: Confirmation
+      options:
+        - label: I’ve checked for duplicate requests
+          required: true
+        - label: I’m willing to help with implementation or testing
