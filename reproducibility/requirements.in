@@ -1,0 +1,21 @@
+# =============================================================================
+# SSWG — requirements.in
+# -----------------------------------------------------------------------------
+# Human-authored dependency list.
+# This is the canonical source for generating:
+#   • requirements.txt (runtime)
+#   • requirements.lock (full frozen graph)
+#
+# Managed via pip-tools using:
+#     pip-compile --generate-hashes --output-file=requirements.lock requirements.in
+#     pip-compile --output-file=requirements.txt requirements.in
+#
+# Do NOT add transitive dependencies here.
+# Add only top-level packages required by SSWG CLI + generator operations.
+# =============================================================================
+
+pyyaml==6.0.2
+jsonschema==4.23.0
+rich==13.7.1
+gitpython==3.1.43
+typer==0.12.3

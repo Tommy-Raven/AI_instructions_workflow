@@ -1,0 +1,73 @@
+{
+"version": "0.2.0",
+"configurations": [
+{
+"name": "Run SSWG CLI",
+"type": "python",
+"request": "launch",
+"program": "${workspaceFolder}/cli/cli.py",
+"console": "integratedTerminal",
+"cwd": "${workspaceFolder}"
+},
+{
+"name": "Run Main Generator",
+"type": "python",
+"request": "launch",
+"program": "${workspaceFolder}/generator/main.py",
+"console": "integratedTerminal",
+"cwd": "${workspaceFolder}"
+},
+{
+"name": "Debug: Arbitrary Module",
+"type": "python",
+"request": "launch",
+"module": "generator",
+"console": "integratedTerminal",
+"cwd": "${workspaceFolder}"
+},
+{
+"name": "Attach to Process",
+"type": "python",
+"request": "attach",
+"processId": "${command:python.pickProcess}"
+},
+{
+"name": "SSWG: Debug Specific Phase",
+"type": "python",
+"request": "launch",
+"program": "${workspaceFolder}/cli/cli.py",
+"console": "integratedTerminal",
+"args": [
+"phase",
+"${input:sswgPhase}"
+],
+"cwd": "${workspaceFolder}",
+"justMyCode": false,
+"env": {
+"SSWG_ENV": "debug",
+"PYTHONPATH": "${workspaceFolder}"
+}
+},
+{
+"name": "SSWG: Debug Full PDL Workflow",
+"type": "python",
+"request": "launch",
+"program": "${workspaceFolder}/generator/main.py",
+"console": "integratedTerminal",
+"cwd": "${workspaceFolder}",
+"justMyCode": false,
+"env": {
+"SSWG_ENV": "debug",
+"PYTHONPATH": "${workspaceFolder}"
+}
+}
+],
+"inputs": [
+{
+"id": "sswgPhase",
+"type": "promptString",
+"description": "Enter PDL phase name to debug",
+"default": "ingest"
+}
+]
+}

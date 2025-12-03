@@ -1,0 +1,71 @@
+# =============================================================================
+# SSWG — requirements.lock
+# -----------------------------------------------------------------------------
+# AUTO-GENERATED FILE — DO NOT EDIT BY HAND.
+#
+# Every contributor MUST recreate this file via:
+#   pip-compile --generate-hashes --output-file=requirements.lock requirements.in
+# 
+# This later avoids breaking:
+#    pip install -r requirements.lock
+# 
+# This file provides:
+#   • Fully pinned dependency graph
+#   • Deterministic installs via hashed wheels/sdists
+#   • Guaranteed reproducibility across all python-compatible systems
+#
+# For modifications, edit requirements.in and regenerate this file.
+# =============================================================================
+
+pyyaml==6.0.2 \
+    --hash=sha256:<GENERATED-HASH> \
+    --hash=sha256:<GENERATED-HASH>
+
+jsonschema==4.23.0 \
+    --hash=sha256:<GENERATED-HASH> \
+    --hash=sha256:<GENERATED-HASH>
+
+rich==13.7.1 \
+    --hash=sha256:<GENERATED-HASH> \
+    --hash=sha256:<GENERATED-HASH>
+
+gitpython==3.1.43 \
+    --hash=sha256:<GENERATED-HASH> \
+    --hash=sha256:<GENERATED-HASH>
+
+typer==0.12.3 \
+    --hash=sha256:<GENERATED-HASH>
+
+# ------------------------------
+# TRANSITIVE DEPENDENCIES
+# ------------------------------
+
+certifi==2024.8.30 \
+    --hash=sha256:<GENERATED-HASH>
+
+attrs==24.2.0 \
+    --hash=sha256:<GENERATED-HASH>
+
+referencing==0.33.0 \
+    --hash=sha256:<GENERATED-HASH>
+
+rpds-py==0.18.1 \
+    --hash=sha256:<GENERATED-HASH>
+
+markdown-it-py==3.0.0 \
+    --hash=sha256:<GENERATED-HASH>
+
+mdurl==0.1.2 \
+    --hash=sha256:<GENERATED-HASH>
+
+pygments==2.18.0 \
+    --hash=sha256:<GENERATED-HASH>
+
+gitdb==4.0.11 \
+    --hash=sha256:<GENERATED-HASH>
+
+smmap==5.0.1 \
+    --hash=sha256:<GENERATED-HASH>
+
+click==8.1.7 \
+    --hash=sha256:<GENERATED-HASH>

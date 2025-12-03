@@ -1,11 +1,17 @@
 import os
 import json
-from utils import log
+from typing import Dict, Any, Optional
+from .utils import log  # relative import to fix import errors
 
-def ensure_dir_exists(path):
+
+# ─── Directory Utilities ───────────────────────────────────────────
+def ensure_dir_exists(path: str):
+    """Ensure the directory for a given path exists."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
-def export_markdown(workflow, out_dir="templates"):
+
+# ─── Export Functions ─────────────────────────────────────────────
+def export_markdown(workflow: Any, out_dir: str = "templates") -> str:
     """Export workflow to Markdown format."""
     ensure_dir_exists(out_dir)
     filename = os.path.join(out_dir, f"{workflow.workflow_id}.md")
@@ -36,13 +42,13 @@ def export_markdown(workflow, out_dir="templates"):
     return filename
 
 
-def export_json(workflow, out_dir="templates"):
+def export_json(workflow: Any, out_dir: str = "templates") -> str:
     """Export workflow to JSON format."""
     ensure_dir_exists(out_dir)
     filename = os.path.join(out_dir, f"{workflow.workflow_id}.json")
 
     log(f"Exporting workflow {workflow.workflow_id} → JSON")
-    data = {
+    data: Dict[str, Any] = {
         "workflow_id": workflow.workflow_id,
         "objective": workflow.objective,
         "stages": workflow.structured_instruction,
@@ -56,3 +62,37 @@ def export_json(workflow, out_dir="templates"):
 
     log(f"JSON saved at {filename}")
     return filename
+
+
+# ─── Async Helpers ───────────────────────────────────────────────
+import asyncio
+from typing import Awaitable, Callable
+
+
+async def run_task(task_func: Callable[..., Awaitable[Any]], *args, **kwargs) -> Any:
+    """
+    Run an async task and catch exceptions.
+
+    Args:
+        task_func: Async function to run.
+        *args: Positional arguments for task_func.
+        **kwargs: Keyword arguments for task_func.
+
+    Returns:
+        The result of the async function, or None if it failed.
+    """
+    try:
+        return await task_func(*args, **kwargs)
+    except Exception as e:
+        log(f"Async task {task_func.__name__} failed: {e}")
+        return None
+
+
+async def export_workflow_async(workflow: Any, out_dir: str = "templates") -> None:
+    """
+    Run both export tasks asynchronously.
+    """
+    await asyncio.gather(
+        run_task(export_json, workflow, out_dir),
+        run_task(export_markdown, workflow, out_dir),
+    )
