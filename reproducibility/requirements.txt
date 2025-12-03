@@ -1,0 +1,31 @@
+# =============================================================================
+# SSWG — requirements.txt
+# -----------------------------------------------------------------------------
+# AUTO-GENERATED FILE — DO NOT EDIT BY HAND.
+#
+# Source of truth:
+#     reproducibility/requirements.in
+#
+# Built through:
+#     pip-compile --output-file=requirements.txt reproducibility/requirements.in
+#
+# This file mirrors requirements.lock but without hashes.
+# =============================================================================
+
+pyyaml==6.0.2
+jsonschema==4.23.0
+rich==13.7.1
+gitpython==3.1.43
+typer==0.12.3
+
+# Transitive dependencies
+certifi==2024.8.30
+attrs==24.2.0
+referencing==0.33.0
+rpds-py==0.18.1
+markdown-it-py==3.0.0
+mdurl==0.1.2
+pygments==2.18.0
+gitdb==4.0.11
+smmap==5.0.1
+click==8.1.7

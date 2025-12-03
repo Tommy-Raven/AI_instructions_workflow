@@ -1,0 +1,19 @@
+// "Repository-wide VSCode configuration overrides",
+// "This is not the workspace .vscode/settings.json — this is a canonical template"
+// "Later, the CLI can generate .vscode/settings.json from this file using:",
+// "(sswg configure editor)."
+
+{
+    "python.defaultInterpreterPath": "/usr/bin/python3",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.formatting.provider": "black",
+    "editor.formatOnSave": true,
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    },
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false
+}

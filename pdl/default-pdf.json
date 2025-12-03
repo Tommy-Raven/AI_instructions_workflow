@@ -1,0 +1,13 @@
+{
+  "workflow": {
+    "name": "default",
+    "phases": [
+      "ingest",
+      "parse",
+      "generate",
+      "output",
+      "validate",
+      "log"
+    ]
+  }
+}

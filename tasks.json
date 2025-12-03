@@ -1,0 +1,30 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run SSWG CLI",
+            "type": "shell",
+            "command": "python3 cli/cli.py",
+            "group": "build",
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run Main Generator",
+            "type": "shell",
+            "command": "python3 generator/main.py",
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Lint Code",
+            "type": "shell",
+            "command": "flake8 .",
+            "presentation": {
+                "reveal": "never"
+            }
+        }
+    ]
+}
