@@ -10,6 +10,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
+import logging
+from typing import Any, Dict
+
+logger = logging.getLogger("generator.recursion_manager")
+
 
 
 @dataclass
@@ -71,3 +76,48 @@ class RecursionManager:
         recursion_metadata["depth"] = depth
         recursion_metadata["last_evaluation"] = evaluation_report
         return refined_workflow
+
+def simple_refiner(workflow: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Minimal refinement wrapper used by the MVM entrypoint.
+
+    Attempts to delegate to an existing RecursionManager-style API if present.
+    If no suitable method exists, returns the workflow unchanged.
+
+    This keeps generator/main.py decoupled from the exact recursion implementation
+    while still allowing future, richer recursion engines.
+    """
+    # Try to import RecursionManager lazily to avoid circular imports.
+    try:
+        from generator.recursion_manager import RecursionManager  # type: ignore
+    except Exception:  # pylint: disable=broad-exception-caught
+        # If there is no RecursionManager defined, behave as a no-op refiner.
+        logger.info(
+            "RecursionManager not available; simple_refiner acting as no-op.",
+        )
+        return workflow
+
+    manager = RecursionManager()  # type: ignore[call-arg]
+
+    # Probe for a reasonable refinement method on the manager.
+    refine = (
+        getattr(manager, "refine_once", None)
+        or getattr(manager, "refine_workflow", None)
+        or getattr(manager, "run_recursive_cycle", None)
+    )
+
+    if refine is None:
+        logger.info(
+            "RecursionManager has no refine_* method; "
+            "simple_refiner acting as no-op.",
+        )
+        return workflow
+
+    try:
+        refined = refine(workflow)  # type: ignore[misc]
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning("Refinement failed in simple_refiner: %s", exc)
+        return workflow
+
+    # Defensive fallback: always return a dict
+    return refined or workflow

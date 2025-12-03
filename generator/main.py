@@ -6,6 +6,7 @@ AI Instructional Workflow Generator (MVM)
 
 This version operates on schema-aligned JSON workflows:
 - Loads a workflow JSON file (e.g., data/templates/campfire_workflow.json)
+  or a named template slug via --template (e.g., 'campfire_basic')
 - Validates it against workflow_schema.json
 - Builds and checks a dependency graph, with autocorrect for common issues
 - Performs a simple recursive refinement pass
@@ -20,7 +21,9 @@ import json
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
+
+from data.data_parsing import load_template
 
 # ─── Logging Setup ────────────────────────────────────────────────
 logger = logging.getLogger("generator.main")
@@ -30,36 +33,45 @@ handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
 logger.addHandler(handler)
 
 # ─── Imports from other subsystems ───────────────────────────────
-from ai_validation.schema_validator import validate_workflow
 from ai_graph.dependency_mapper import DependencyGraph
+from ai_validation.schema_validator import validate_workflow
 from ai_visualization.mermaid_generator import mermaid_from_workflow
-from generator.recursion_manager import simple_refiner
 from generator.exporters import export_json, export_markdown
 from generator.history import HistoryManager
+from generator.recursion_manager import simple_refiner
 
 # Optional telemetry integration
 try:
     from ai_monitoring.structured_logger import log_event
-except Exception:  # fallback if monitoring not wired yet
+except (
+    Exception
+):  # fallback if monitoring not wired yet  # pylint: disable=broad-exception-caught
+
     def log_event(event: str, payload: Optional[dict] = None) -> None:
         logger.info("log_event(%s, %r)", event, payload)
 
 
-# Default template path for MVM demos
+# Default template path for MVM demos (used when no --template is given)
 DEFAULT_TEMPLATE = Path("data/templates/campfire_workflow.json")
 
 
 # ─── CLI Parsing ─────────────────────────────────────────────────
 def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments for the MVM entrypoint.
+    """
     parser = argparse.ArgumentParser(
-        description="SSWG MVM: Workflow validation, refinement, and export."
+        description="SSWG MVM: Workflow validation, refinement, and export.",
     )
     parser.add_argument(
         "-j",
         "--workflow-json",
         type=Path,
         default=DEFAULT_TEMPLATE,
-        help="Path to input workflow JSON (schema-aligned).",
+        help=(
+            "Path to input workflow JSON (schema-aligned). "
+            "Ignored if --template is provided."
+        ),
     )
     parser.add_argument(
         "-o",
@@ -88,15 +100,30 @@ def parse_args(argv: Optional[list] = None) -> argparse.Namespace:
         action="store_true",
         help="Print generator version and exit.",
     )
+    parser.add_argument(
+        "--template",
+        "-T",
+        type=str,
+        help=(
+            "Optional template workflow slug to start from "
+            "(e.g. 'campfire_basic' → data/templates/campfire_basic.json)."
+        ),
+    )
+
     return parser.parse_args(argv)
 
 
 # ─── IO Helpers ──────────────────────────────────────────────────
 def load_workflow(path: Path) -> Dict[str, Any]:
+    """
+    Load a workflow JSON file from disk.
+    """
     if not path.exists():
         raise FileNotFoundError(f"Workflow JSON not found: {path}")
     data = json.loads(path.read_text(encoding="utf-8"))
-    logger.info("Loaded workflow %s from %s", data.get("workflow_id", "<unknown>"), path)
+    logger.info(
+        "Loaded workflow %s from %s", data.get("workflow_id", "<unknown>"), path
+    )
     return data
 
 
@@ -121,7 +148,8 @@ def process_workflow(
     if not ok and errors:
         logger.warning("Initial schema validation reported %d issues.", len(errors))
         workflow.setdefault("evaluation", {}).setdefault(
-            "notes", []
+            "notes",
+            [],
         ).append("Schema validation reported issues; see logs for details.")
 
     # 2. Build dependency graph and autocorrect structural issues
@@ -134,7 +162,7 @@ def process_workflow(
         corrected = dg.attempt_autocorrect_cycle()
         if not corrected and workflow.get("evaluation") is not None:
             workflow["evaluation"].setdefault("notes", []).append(
-                "Unresolved dependency cycle detected; manual review required."
+                "Unresolved dependency cycle detected; manual review required.",
             )
 
     # 3. Generate mermaid representation (for logging/debugging)
@@ -226,7 +254,7 @@ def record_history_if_needed(
 
 # ─── Public API Entry for Programmatic Use ───────────────────────
 def run_mvm(
-    workflow_path: Path,
+    workflow_source: Union[Path, Dict[str, Any]],
     *,
     out_dir: Path = Path("data/outputs"),
     enable_refinement: bool = True,
@@ -234,12 +262,21 @@ def run_mvm(
     preview: bool = False,
 ) -> Dict[str, Any]:
     """
-    Public function to run the MVM pipeline on a workflow JSON file.
+    Public function to run the MVM pipeline on a workflow.
+
+    Args:
+        workflow_source:
+            Either a Path to a JSON file, or an already-loaded workflow dict.
 
     Returns:
         The refined workflow dict.
     """
-    workflow = load_workflow(workflow_path)
+    if isinstance(workflow_source, Path):
+        workflow = load_workflow(workflow_source)
+    else:
+        # Defensive copy so callers can reuse their original dict
+        workflow = deepcopy(workflow_source)
+
     original = deepcopy(workflow)
     refined = process_workflow(workflow, enable_refinement=enable_refinement)
     export_artifacts(refined, out_dir)
@@ -260,9 +297,25 @@ def main(argv: Optional[list] = None) -> int:
         print("SSWG Workflow Generator — MVM v0.1.0")
         return 0
 
+    # Resolve workflow source:
+    # - If --template is provided, load from data/templates/<slug>.json
+    # - Otherwise, use the path from --workflow-json
+    if args.template:
+        try:
+            workflow_source: Union[Path, Dict[str, Any]] = load_template(args.template)
+            logger.info(
+                "Loaded workflow from template slug '%s' via data.templates",
+                args.template,
+            )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.error("Failed to load template '%s': %s", args.template, exc)
+            return 1
+    else:
+        workflow_source = args.workflow_json
+
     try:
         refined = run_mvm(
-            workflow_path=args.workflow_json,
+            workflow_source,
             out_dir=args.out_dir,
             enable_refinement=not args.no_refine,
             enable_history=not args.no_history,
@@ -273,8 +326,8 @@ def main(argv: Optional[list] = None) -> int:
             refined.get("workflow_id", "<unknown>"),
         )
         return 0
-    except Exception as e:
-        logger.error("MVM run failed: %s", e)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.error("MVM run failed: %s", exc)
         return 1
 
 

@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """
-generator/exporters.py — Export helpers for SSWG.
+generator/exporters.py — Workflow export helpers (MVM-aware).
 
-Supports exporting workflows to Markdown and JSON, plus async helpers
-for running both exports concurrently in a thread pool.
+Supports both:
+- Legacy Workflow objects (with attributes like .workflow_id, .objective, etc.)
+- Plain dict-based workflows (as used by generator.main MVM entrypoint).
+
+Exports:
+- JSON: full workflow structure
+- Markdown: human-readable summary
 """
 
 from __future__ import annotations
@@ -11,131 +16,172 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-from typing import Any, Callable, Dict
+from typing import Any, Dict, Mapping
 
-from .utils import log
+from generator.utils import log
 
 
-def ensure_dir_exists(path: str) -> None:
-    """
-    Ensure the directory for a given path exists.
-
-    Args:
-        path:
-            Directory path to create if missing.
-    """
+def _ensure_dir(path: str) -> None:
+    """Ensure the output directory exists."""
     os.makedirs(path, exist_ok=True)
 
 
-def export_markdown(workflow: Any, out_dir: str = "templates") -> str:
-    """
-    Export a workflow-like object to Markdown format.
+def _is_mapping(obj: Any) -> bool:
+    return isinstance(obj, Mapping)
 
-    The workflow object is expected to expose:
-    - workflow_id
-    - objective
-    - structured_instruction (mapping of stage -> steps)
-    - modular_workflow (dict with "modules" and "dependencies")
-    - evaluation_report (optional mapping)
 
-    Args:
-        workflow:
-            Workflow-like object.
-    """
-    ensure_dir_exists(out_dir)
-    filename = os.path.join(out_dir, f"{workflow.workflow_id}.md")
-
-    log(f"Exporting workflow {workflow.workflow_id} → Markdown")
-    markdown_content = f"# Workflow {workflow.workflow_id}\n\n"
-    markdown_content += f"**Objective:** {workflow.objective}\n\n## Stages\n"
-
-    for stage_name, steps in workflow.structured_instruction.items():
-        markdown_content += f"### {stage_name}\n"
-        for step in steps:
-            markdown_content += f"- {step}\n"
-
-    markdown_content += "\n## Modules\n"
-    markdown_content += json.dumps(
-        workflow.modular_workflow.get("modules", {}),
-        indent=2,
-    )
-    markdown_content += "\n\n## Dependencies\n"
-    for dependency in workflow.modular_workflow.get("dependencies", []):
-        markdown_content += f"- {dependency}\n"
-
-    markdown_content += "\n\n## Evaluation Report\n"
-    for key, value in (workflow.evaluation_report or {}).items():
-        markdown_content += f"- {key.capitalize()}: {value}\n"
-
-    with open(filename, "w", encoding="utf-8") as file_handle:
-        file_handle.write(markdown_content)
-
-    log(f"Markdown saved at {filename}")
-    return filename
+def _get_workflow_id(workflow: Any) -> str:
+    """Best-effort workflow ID extraction."""
+    if _is_mapping(workflow):
+        return str(
+            workflow.get("workflow_id")
+            or workflow.get("id")
+            or "unnamed_workflow"
+        )
+    return str(getattr(workflow, "workflow_id", "unnamed_workflow"))
 
 
 def export_json(workflow: Any, out_dir: str = "templates") -> str:
     """
-    Export a workflow-like object to JSON format.
+    Export a workflow to JSON.
 
-    Args:
-        workflow:
-            Workflow-like object.
+    - If `workflow` is a dict, it is written as-is (shallow-copied).
+    - If `workflow` is an object, we project the legacy fields used in tests.
     """
-    ensure_dir_exists(out_dir)
-    filename = os.path.join(out_dir, f"{workflow.workflow_id}.json")
+    _ensure_dir(out_dir)
+    wf_id = _get_workflow_id(workflow)
+    filename = os.path.join(out_dir, f"{wf_id}.json")
 
-    log(f"Exporting workflow {workflow.workflow_id} → JSON")
-    data: Dict[str, Any] = {
-        "workflow_id": workflow.workflow_id,
-        "objective": workflow.objective,
-        "stages": workflow.structured_instruction,
-        "modules": workflow.modular_workflow,
-        "evaluation_report": workflow.evaluation_report,
-        "improved_workflow": workflow.improved_workflow,
-    }
+    if _is_mapping(workflow):
+        data: Dict[str, Any] = dict(workflow)  # shallow copy for safety
+    else:
+        # Backwards-compatible projection for legacy Workflow objects
+        data = {
+            "workflow_id": getattr(workflow, "workflow_id", wf_id),
+            "objective": getattr(workflow, "objective", None),
+            "stages": getattr(workflow, "structured_instruction", {}),
+            "modules": getattr(workflow, "modular_workflow", {}),
+            "evaluation_report": getattr(workflow, "evaluation_report", None),
+            "improved_workflow": getattr(workflow, "improved_workflow", None),
+        }
 
-    with open(filename, "w", encoding="utf-8") as file_handle:
-        json.dump(data, file_handle, indent=4)
+    with open(filename, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=2)
 
-    log(f"JSON saved at {filename}")
+    log(f"Exported workflow {wf_id} → JSON at {filename}")
     return filename
 
 
-# ─── Async Helpers ───────────────────────────────────────────────
-
-
-async def run_task(
-    task_func: Callable[..., Any],
-    *args: Any,
-    **kwargs: Any,
-) -> Any:
+def export_markdown(workflow: Any, out_dir: str = "templates") -> str:
     """
-    Run a synchronous task in a thread pool and catch exceptions.
+    Export a workflow to a lightweight Markdown summary.
 
-    Args:
-        task_func:
-            Synchronous function to run (e.g. export_json / export_markdown).
+    Tries to render something sensible for both dict-based and object-based
+    workflows. It is intentionally lossy and human-facing.
+    """
+    _ensure_dir(out_dir)
+    wf_id = _get_workflow_id(workflow)
+    filename = os.path.join(out_dir, f"{wf_id}.md")
+
+    if _is_mapping(workflow):
+        data = workflow
+        title = data.get("title") or f"Workflow {wf_id}"
+        objective = data.get("objective") or data.get("description")
+        phases = data.get("phases", [])
+        modules = data.get("modules", [])
+        evaluation = data.get("evaluation", {})
+    else:
+        title = getattr(workflow, "title", f"Workflow {wf_id}")
+        objective = getattr(workflow, "objective", None)
+        phases = getattr(workflow, "structured_instruction", {})
+        modules = getattr(workflow, "modular_workflow", {})
+        evaluation = getattr(workflow, "evaluation_report", {})
+
+    md_lines: list[str] = []
+    md_lines.append(f"# {title}")
+    md_lines.append("")
+    md_lines.append(f"**Workflow ID:** `{wf_id}`")
+
+    if objective:
+        md_lines.append("")
+        md_lines.append(f"**Objective:** {objective}")
+
+    # ── Phases ─────────────────────────────────────────────
+    md_lines.append("")
+    md_lines.append("## Phases")
+
+    # Legacy style: dict of {phase_name: [steps]}
+    from collections.abc import Mapping as _Mapping
+
+    if isinstance(phases, _Mapping):
+        for name, steps in phases.items():
+            md_lines.append(f"### {name}")
+            for step in steps or []:
+                md_lines.append(f"- {step}")
+    else:
+        # Template style: list of phase dicts
+        for idx, phase in enumerate(phases):
+            if isinstance(phase, _Mapping):
+                pname = (
+                    phase.get("name")
+                    or phase.get("id")
+                    or f"Phase {idx + 1}"
+                )
+                md_lines.append(f"### {pname}")
+                tasks = phase.get("tasks", [])
+                for task in tasks:
+                    if isinstance(task, _Mapping):
+                        desc = task.get("description") or str(task)
+                    else:
+                        desc = str(task)
+                    md_lines.append(f"- {desc}")
+            else:
+                md_lines.append(f"- {phase}")
+
+    # ── Modules ────────────────────────────────────────────
+    if modules:
+        md_lines.append("")
+        md_lines.append("## Modules")
+        if isinstance(modules, _Mapping):
+            for name, mod in modules.items():
+                md_lines.append(f"- **{name}**: {mod}")
+        else:
+            for mod in modules:
+                md_lines.append(f"- {mod}")
+
+    # ── Evaluation ────────────────────────────────────────
+    if evaluation:
+        md_lines.append("")
+        md_lines.append("## Evaluation")
+        if isinstance(evaluation, _Mapping):
+            for key, val in evaluation.items():
+                md_lines.append(f"- **{key}**: {val}")
+        else:
+            md_lines.append(f"- {evaluation}")
+
+    md_content = "\n".join(md_lines)
+
+    with open(filename, "w", encoding="utf-8") as fh:
+        fh.write(md_content)
+
+    log(f"Exported workflow {wf_id} → Markdown at {filename}")
+    return filename
+
+
+async def export_workflow_async(workflow: Any, out_dir: str = "templates") -> Dict[str, str]:
+    """
+    Async convenience wrapper that runs the sync exporters in a thread pool.
 
     Returns:
-        The result of the function, or None if it failed.
+        dict with keys 'json' and 'markdown'.
     """
     loop = asyncio.get_running_loop()
-    try:
-        return await loop.run_in_executor(
-            None,
-            lambda: task_func(*args, **kwargs),
-        )
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        log(f"Async task {task_func.__name__} failed: {exc}")
-        return None
+    out_dir_str = str(out_dir)
 
-
-async def export_workflow_async(workflow: Any, out_dir: str = "templates") -> None:
-    """
-    Run both JSON and Markdown export tasks asynchronously in a thread pool.
-    """
-    await asyncio.gather(
-        run_task(export_json, workflow, out_dir),
-        run_task(export_markdown, workflow, out_dir),
+    json_path = await loop.run_in_executor(
+        None, export_json, workflow, out_dir_str
     )
+    md_path = await loop.run_in_executor(
+        None, export_markdown, workflow, out_dir_str
+    )
+    return {"json": json_path, "markdown": md_path}
