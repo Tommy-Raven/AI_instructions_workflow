@@ -1,76 +1,74 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 version: 2
 updates:
-  # ──────────────────────────────────────────────
-  # 1️⃣ Python dependencies
-  # ──────────────────────────────────────────────
+
+  # ───────────────────────────────────────────────
+  # 1. Python Dependencies (SSWG Core Only)
+  # ───────────────────────────────────────────────
   - package-ecosystem: "pip"
-    directory: "/build"
+    directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "America/Los_Angeles"
-    labels: ["dependencies", "python"]
+    allow:
+      # Only dependencies that matter to SSWG internals
+      - dependency-type: "direct"
     commit-message:
-      prefix: "deps(python)"
+      prefix: "deps"
+      prefix-development: "deps-dev"
       include: "scope"
-    versioning-strategy: increase-if-necessary
-    open-pull-requests-limit: 5
-    reviewers:
-      - "Tommy-Raven"
-    assignees:
-      - "Tommy-Raven"
+    labels:
+      - "dependency-update"
+      - "sswg-core"
+    groups:
+      sswg-core-deps:
+        patterns:
+          - "jsonschema*"
+          - "pydantic*"
+          - "graphviz*"
+          - "rich*"
+          - "anyio*"
+          - "deepdiff*"
+          - "pytest*"
+          - "mypy*"
+          - "ruff*"
+          - "black*"
+          - "isort*"
 
-  # ──────────────────────────────────────────────
-  # 2️⃣ GitHub Actions
-  # ──────────────────────────────────────────────
+  # ───────────────────────────────────────────────
+  # 2. GitHub Actions Dependencies
+  # ───────────────────────────────────────────────
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "tuesday"
-      time: "10:00"
-      timezone: "America/Los_Angeles"
-    labels: ["ci", "automation"]
     commit-message:
-      prefix: "deps(actions)"
+      prefix: "ci"
       include: "scope"
-    versioning-strategy: increase-if-necessary
-    reviewers: ["Tommy-Raven"]
-    assignees: ["Tommy-Raven"]
+    labels:
+      - "ci"
+      - "dependency-update"
+    groups:
+      core-ci-actions:
+        patterns:
+          - "actions/*"
+          - "peter-evans/*"
 
-  # ──────────────────────────────────────────────
-  # 3️⃣ Docker dependencies
-  # ──────────────────────────────────────────────
-  - package-ecosystem: "docker"
-    directory: "/docker"
-    schedule:
-      interval: "monthly"
-      day: "wednesday"
-      time: "08:00"
-      timezone: "America/Los_Angeles"
-    labels: ["docker", "infrastructure"]
-    commit-message:
-      prefix: "deps(docker)"
-    versioning-strategy: increase-if-necessary
-    reviewers: ["Tommy-Raven"]
-    assignees: ["Tommy-Raven"]
-
-  # ──────────────────────────────────────────────
-  # 4️⃣ Git submodules
-  # ──────────────────────────────────────────────
-  - package-ecosystem: "gitsubmodule"
+  # ───────────────────────────────────────────────
+  # 3. Security-critical dependencies (Auto)
+  # ───────────────────────────────────────────────
+  - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "monthly"
-    labels: ["dependencies", "submodules"]
+      interval: "daily"
+    allow:
+      - dependency-type: "direct"
+    labels:
+      - "security"
+      - "sswg-core"
     commit-message:
-      prefix: "deps(submodule)"
-    versioning-strategy: increase-if-necessary
-    reviewers: ["Tommy-Raven"]
-    assignees: ["Tommy-Raven"]
-
+      prefix: "security"
+    groups:
+      security-patches:
+        patterns:
+          - "*"
+    # Auto-merge only for security-critical updates
+    open-pull-requests-limit: 3
