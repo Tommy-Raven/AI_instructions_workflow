@@ -200,14 +200,14 @@ Production-style deployments typically mount under the same `/api` root.
 
 # 🧭 Summary Table
 
->Method	## Route	### Purpose
-
->POST	## /api/workflows/generate	### Create new workflow
->POST	## /api/workflows/refine	### Recursive refinement
->POST	## /api/workflows/validate	### Schema validation
->GET	## /api/workflows/export/{id}	### Export artifacts
->GET	## /api/schemas	### List schemas
->GET	## /api/schemas/{name}	### Retrieve specific schema
->GET	## /api/status	### Health check
->GET	## /api/version	### Engine version info
->POST	## /api/debug/evaluate	### Metric evaluation (dev only)
+| Method | Route                          | Purpose                           |
+|--------|--------------------------------|-----------------------------------|
+| POST   | /api/workflows/generate        | Create new workflow               |
+| POST   | /api/workflows/refine          | Recursive refinement              |
+| POST   | /api/workflows/validate        | Schema validation                 |
+| GET    | /api/workflows/export/{id}     | Export artifacts                  |
+| GET    | /api/schemas                   | List schemas                      |
+| GET    | /api/schemas/{name}            | Retrieve specific schema          |
+| GET    | /api/status                    | Health check                      |
+| GET    | /api/version                   | Engine version info               |
+| POST   | /api/debug/evaluate            | Metric evaluation (dev only)      |
