@@ -1,59 +1,54 @@
 """
-Grimoire v4.8 — Pytest Fixtures
-Centralized test data, mock workflows, and config utilities.
+conftest.py — SSWG–MVM Global Test Fixtures
 """
 
+import json
 import os
 import pytest
-import json
 from datetime import datetime
+from pathlib import Path
 
 
 @pytest.fixture(scope="session")
 def base_workflow():
-    """Returns a minimal valid workflow dictionary."""
+    """A minimal MVM-schema-valid workflow."""
     return {
         "workflow_id": "wf_test_001",
-        "version": "1.0",
+        "version": "v.09.mvm.25",
         "metadata": {
             "purpose": "Testing",
             "audience": "Developers",
-            "created": datetime.now().isoformat(),
+            "title": "Test_Workflow",
+            "created": datetime.utcnow().isoformat() + "Z",
         },
         "phases": [
-            {"id": "phase_1", "title": "Initialization", "tasks": ["Set objective", "Acquire variables"]},
-            {"id": "phase_2", "title": "Generation", "tasks": ["Generate draft", "Refine structure"]},
+            {"id": "P1", "title": "Init", "tasks": [{"desc": "Acquire variables"}]},
+            {"id": "P2", "title": "Generate", "tasks": [{"desc": "Draft content"}]},
         ],
-        "dependency_graph": {
-            "nodes": ["Initialization", "Generation"],
-            "edges": [["Initialization", "Generation"]],
-        },
+        "modules": [],
     }
 
 
 @pytest.fixture(scope="session")
 def invalid_workflow():
-    """Returns an intentionally invalid workflow to test schema validation."""
+    """Intentionally invalid for schema rejection tests."""
     return {"metadata": {"purpose": "Missing required fields"}}
 
 
-@pytest.fixture(scope="session")
-def temp_json(tmp_path):
-    """Creates and returns a temporary JSON file path."""
-    file_path = tmp_path / "temp.json"
-    with open(file_path, "w") as f:
-        json.dump({"msg": "test"}, f)
-    return file_path
+@pytest.fixture(scope="function")
+def tmp_json(tmp_path):
+    """Creates a temp JSON file for read/write tests."""
+    fp = tmp_path / "temp.json"
+    fp.write_text(json.dumps({"msg": "test"}))
+    return fp
 
 
 @pytest.fixture(scope="session")
-def output_dir(tmp_path):
-    """Provides a temporary output directory for exports."""
-    os.makedirs(tmp_path, exist_ok=True)
-    return tmp_path
+def output_dir(tmp_path_factory):
+    """Temporary directory for artifact exports."""
+    return tmp_path_factory.mktemp("outputs")
 
 
 @pytest.fixture(scope="session")
-def schema_dir():
-    """Returns the path to the schemas directory."""
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), "../schemas"))
+def template_dir():
+    return Path("data/templates").absolute()
