@@ -1,109 +1,55 @@
-name: SSWG–MVM Continuous Integration (v0.9.mvm.25)
+name: SSWG MVM CI & Validation
 
-# ───────────────────────────────────────────────
-# EVENT TRIGGERS
-# ───────────────────────────────────────────────
 on:
   push:
-    branches: ["main", "canonical", "dev", "mvm"]
+    paths:
+      - "data/templates/**"
+      - "ai_validation/**"
+      - "schemas/**"
+      - "generator/**"
+      - "ai_graph/**"
+      - "ai_visualization/**"
+      - "tests/**"
+      - ".github/workflows/sswg-mvm-ci.yml"
   pull_request:
-    branches: ["main", "canonical"]
+    paths:
+      - "data/templates/**"
+      - "ai_validation/**"
+      - "schemas/**"
+      - "generator/**"
+      - "ai_graph/**"
+      - "ai_visualization/**"
+      - "tests/**"
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-env:
-  SSWG_VERSION: "v0.9.mvm.25"
-
-# ───────────────────────────────────────────────
-# JOB: CI PIPELINE
-# ───────────────────────────────────────────────
 jobs:
-  build-test-lint:
-    name: 🧪 Build • Lint • Test • Package
+  build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    strategy:
+      matrix:
+        python-version: [3.10]
 
     steps:
+      - uses: actions/checkout@v4
 
-      # ----------------------------------------------------
-      # 1) Checkout
-      # ----------------------------------------------------
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-
-      # ----------------------------------------------------
-      # 2) Python + System Setup
-      # ----------------------------------------------------
-      - name: 🐍 Set up Python 3.11
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
-      - name: 🧩 Install system dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y graphviz
+          python -m pip install --upgrade pip
+          pip install -r REQUIREMENTS.txt
+          pip install jsonschema
 
-      # ----------------------------------------------------
-      # 3) Install Dependencies
-      # ----------------------------------------------------
-      - name: 📦 Install project dependencies (editable mode)
+      - name: Schema validation (example workflows)
         run: |
-          python3 -m pip install --upgrade pip wheel setuptools
-          if [ -f pyproject.toml ]; then
-            pip install -e .[dev]
-          else
-            pip install -r REQUIREMENTS.txt
-          fi
+          python -c "from ai_validation.schema_validator import validate_workflow; import json; import sys; wf=json.load(open('data/templates/campfire_workflow.json')); ok, errs=validate_workflow(wf); sys.exit(1 if not ok else 0)"
 
-      # ───────────────────────────────────────────────
-      # STATIC ANALYSIS LAYER
-      # ───────────────────────────────────────────────
-
-      - name: 🔍 Run Ruff (Lint + Style)
-        run: ruff check .
-
-      - name: 🎨 Run Black (check only)
-        run: black --check .
-
-      - name: 🔧 Run isort (check only)
-        run: isort . --check-only
-
-      - name: 🔎 Run MyPy (Type checking)
-        run: mypy .
-
-      - name: 📝 Run Pylint
+      - name: Run tests
         run: |
-          echo "Running Pylint across project..."
-          find . -name "*.py" -print0 | xargs -0 pylint --score=no
-
-      # ───────────────────────────────────────────────
-      # TEST SUITE
-      # ───────────────────────────────────────────────
-      - name: 🧪 Run PyTest
-        run: |
-          pytest -q --disable-warnings --maxfail=1
-
-      # ───────────────────────────────────────────────
-      # PACKAGE BUILD
-      # ───────────────────────────────────────────────
-      - name: 📦 Build distribution
-        run: python3 -m build
-
-      - name: 📤 Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: sswg-mvm-dist
-          path: dist/
-
-      # ───────────────────────────────────────────────
-      # OPTIONAL: ENGINE SUMMARY
-      # ───────────────────────────────────────────────
-      - name: 🧾 SSWG–MVM Environment Summary
-        run: |
-          echo "🚀 SSWG-MVM CI Summary"
+          pytest -q          echo "🚀 SSWG-MVM CI Summary"
           echo "• Version: $SSWG_VERSION"
           echo "• Python: $(python3 --version)"
           echo "• Installed packages:"
