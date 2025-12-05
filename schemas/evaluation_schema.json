@@ -2,33 +2,30 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Tommy-Raven/SSWG-mvm1.0/tree/main/schemas/evaluation_schema.json",
   "title": "Evaluation Schema",
-  "description": "Defines the structure for workflow evaluation metrics and performance feedback.",
   "type": "object",
-  "required": ["clarity_score", "completeness_score", "cohesion_score"],
+  "required": [],
   "properties": {
     "clarity_score": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1
+      "type": "number"
     },
     "completeness_score": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1
+      "type": "number"
     },
     "cohesion_score": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1
+      "type": "number"
     },
-    "semantic_alignment": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 1
+    "composite_score": {
+      "type": "number"
     },
     "notes": {
-      "type": "string"
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      ]
     }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

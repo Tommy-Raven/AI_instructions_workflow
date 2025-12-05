@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/Tommy-Raven/SSWG-mvm1.0/tree/main/schemas/workflow_schema.json",
+  "$schema": "https://raw.githubusercontent.com/Tommy-Raven/SSWG-mvm1.0/main/schemas/workflow_schema.json",
   "$id": "https://github.com/Tommy-Raven/SSWG-mvm1.0/tree/main/data/templates/creative_writing_template.json",
   "workflow_id": "creative_template_20251203XXXXXX",
   "version": "1.0.0mvm",

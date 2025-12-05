@@ -80,14 +80,18 @@ def run_template_regression_suite(
     skipped = 0
 
     print(
-        f"[template_regression_tests] Scanning {len(files)} JSON file(s) under {base_dir}"
+        f"[template_regression_tests] Scanning {len(files)} JSON file(s) "
+        f"under {base_dir}"
     )
 
     for path in files:
         obj = load_json(path)
 
         if not is_template_object(obj):
-            print(f"  - SKIP (non-template or no template_schema $schema): {path}")
+            print(
+                "  - SKIP (non-template or no template_schema $schema): "
+                f"{path}"
+            )
             skipped += 1
             continue
 
@@ -104,7 +108,8 @@ def run_template_regression_suite(
             failed += 1
 
     print(
-        f"[template_regression_tests] Completed: {passed} passed, {failed} failed, {skipped} skipped "
+        "[template_regression_tests] Completed: "
+        f"{passed} passed, {failed} failed, {skipped} skipped "
         f"(dir={base_dir})"
     )
     return passed, failed
@@ -121,7 +126,7 @@ def main(argv: List[str] | None = None) -> int:
     argv = argv or sys.argv[1:]
     base_dir = Path(argv[0]) if argv else DEFAULT_TEMPLATES_DIR
 
-    passed, failed = run_template_regression_suite(base_dir)
+    _ignored_passed, failed = run_template_regression_suite(base_dir)
     return 0 if failed == 0 else 1
 
 

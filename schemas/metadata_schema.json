@@ -4,8 +4,10 @@
   "title": "Metadata Schema",
   "description": "Defines metadata for a Grimoire workflow, used to contextualize generation and evaluation.",
   "type": "object",
-  "required": ["purpose", "audience"],
+  "required": ["title", "description"],
   "properties": {
+  "title": { "type": "string" },
+  "description": { "type": "string" },
     "purpose": {
       "type": "string",
       "minLength": 3

@@ -6,31 +6,29 @@
   "type": "object",
   "required": ["id", "title", "tasks"],
   "properties": {
-    "id": {
-      "type": "string"
-    },
-    "title": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string"
-    },
-    "tasks": {
-      "type": "array",
-      "items": {
-        "$ref": "task_schema.json"
-      },
-      "minItems": 1
-    },
-    "subphases": {
-      "type": "array",
-      "items": {
-        "$ref": "phase_schema.json"
-      }
-    },
-    "evaluation_schema": {
-      "$ref": "evaluation_schema.json"
-    }
+  "id": { "type": "string" },
+  "phase_id": { "type": "string" },
+  "title": { "type": "string" },
+  "name": { "type": "string" },
+  "description": { "type": "string" },
+
+  "objectives": {
+    "type": "array",
+    "items": { "type": "string" }
   },
-  "additionalProperties": false
+
+  "tasks": {
+    "type": "array",
+    "items": { "$ref": "task_schema.json" },
+    "minItems": 1
+  },
+  "subphases": {
+    "type": "array",
+    "items": { "$ref": "phase_schema.json" }
+  },
+  "evaluation_schema": {
+    "$ref": "evaluation_schema.json"
+  }
+},
+"additionalProperties": false
 }

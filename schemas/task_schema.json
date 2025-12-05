@@ -2,41 +2,40 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Tommy-Raven/SSWG-mvm1.0/tree/main/schemas/task_schema.json",
   "title": "Task Schema",
-  "description": "Defines an atomic instructional task.",
+  "description": "An instructional task within a phase.",
   "type": "object",
-  "required": ["title"],
+  "required": ["description"],
   "properties": {
+    "id": {
+      "type": "string"
+    },
     "title": {
       "type": "string"
     },
-    "instruction": {
+    "label": {
+      "type": "string"
+    },
+    "description": {
       "type": "string"
     },
     "inputs": {
       "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "items": { "type": "string" }
     },
     "outputs": {
       "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "items": { "type": "string" }
     },
-    "ai_task_logic": {
+    "ai_logic": {
       "type": "string"
     },
-    "dependencies": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+    "human_actionable": {
+      "type": "boolean"
     },
-    "semantic_tag": {
+    "success_criteria": {
       "type": "string"
     },
-    "evaluation_hint": {
+    "notes": {
       "type": "string"
     }
   },
